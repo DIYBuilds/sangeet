@@ -6,20 +6,17 @@ import 'package:flutter_discord_rpc/flutter_discord_rpc.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:hotkey_manager/hotkey_manager.dart';
-import 'package:sangeet/core/widgets/blur_image_container.dart';
-import 'package:sangeet/functions/player/views/current_playing_view.dart';
+import 'package:sangeet/core/core.dart';
+import 'package:sangeet/functions/explore/controllers/explore_controller.dart';
+import 'package:sangeet/functions/explore/widgets/explore_list.dart';
+import 'package:sangeet/functions/explore/widgets/trend_card.dart';
 import 'package:window_manager/window_manager.dart';
 import 'package:tray_manager/tray_manager.dart';
 
 import 'package:sangeet/core/constants.dart';
-import 'package:sangeet/functions/explore/views/explore_view.dart';
 import 'package:sangeet/functions/player/controllers/player_controller.dart';
 import 'package:sangeet/functions/player/widgets/base_audio_player.dart';
-import 'package:sangeet/functions/search/views/search_view.dart';
-import 'package:sangeet/functions/settings/views/settings_view.dart';
 import 'package:sangeet/functions/shortcuts/actions.dart';
-
-import '../core/app_config.dart';
 
 class HomeFrame extends ConsumerStatefulWidget {
   const HomeFrame({super.key});
@@ -60,10 +57,8 @@ class _HomeFrameState extends ConsumerState<HomeFrame>
 
   @override
   Widget build(BuildContext context) {
-    final index = ref.watch(appScreenConfigProvider);
-    final config = ref.watch(appScreenConfigProvider.notifier);
     final player = ref.watch(playerControllerProvider.notifier).getPlayer;
-
+    final currentWidth = MediaQuery.of(context).size.width;
     return Actions(
       actions: <Type, Action<Intent>>{
         BaseIntent: SongActions(
@@ -83,91 +78,214 @@ class _HomeFrameState extends ConsumerState<HomeFrame>
           ),
         },
         child: Scaffold(
-          backgroundColor: Colors.transparent,
-          body: BlurImageContainer(
-            child: Row(
-              children: [
-                NavigationRail(
-                  selectedIndex: index,
-                  onDestinationSelected: (idx) => config.onIndex(idx),
-                  destinations: const [
-                    NavigationRailDestination(
-                      icon: Icon(Icons.home),
-                      label: Text("Home"),
+          body: Row(
+            mainAxisSize: MainAxisSize.max,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              Container(
+                decoration: BoxDecoration(
+                    border: Border(
+                        right: BorderSide(
+                  width: 2,
+                  color: Colors.teal.withOpacity(.09),
+                ))),
+                width: 430,
+                height: double.infinity,
+                child: Column(
+                  children: [
+                    Flexible(
+                      flex: 1,
+                      child: SizedBox(
+                        width: double.infinity,
+                        height: double.maxFinite,
+                        child: ref.watch(getExploreDataProvider).when(
+                              data: (data) {
+                                final trendings = data.trending;
+
+                                return Column(
+                                  children: [
+                                    Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        const Padding(
+                                          padding: EdgeInsets.all(10.0),
+                                          child: Text(
+                                            'Trending.',
+                                            style: TextStyle(
+                                              fontSize: 30,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                        ),
+                                        IconButton(
+                                          onPressed: () => ref
+                                              .read(playerControllerProvider
+                                                  .notifier)
+                                              .reset(),
+                                          icon: const Icon(Icons
+                                              .disabled_by_default_rounded),
+                                        )
+                                      ],
+                                    ),
+                                    SizedBox(
+                                      width: 430,
+                                      height:
+                                          MediaQuery.of(context).size.height -
+                                              165,
+                                      child: ListView.builder(
+                                        itemCount: trendings.length,
+                                        scrollDirection: Axis.vertical,
+                                        itemBuilder: (context, index) {
+                                          final item = trendings[index];
+                                          return TrendCard(
+                                            key: Key("trend_${item.id}"),
+                                            onTap: () => ref
+                                                .watch(playerControllerProvider
+                                                    .notifier)
+                                                .runRadio(
+                                                  radioId: item.id,
+                                                  type: MediaType.fromString(
+                                                      item.type),
+                                                  redirect: () {},
+                                                ),
+                                            onLike: () {},
+                                            onPlay: () {},
+                                            image: item.image,
+                                            accentColor: item.accentColor,
+                                            title: item.title,
+                                            subtitle: item.subtitle,
+                                            explicitContent:
+                                                item.explicitContent,
+                                            badgeIcon: item.type == "song"
+                                                ? Icons.music_note
+                                                : item.type == "playlist"
+                                                    ? Icons
+                                                        .playlist_play_rounded
+                                                    : Icons.album_rounded,
+                                          );
+                                        },
+                                      ),
+                                    ),
+                                  ],
+                                );
+                              },
+                              error: (error, stackTrace) {
+                                return ErrorText(
+                                  error: error.toString(),
+                                );
+                              },
+                              loading: () => const CircularProgressIndicator(),
+                            ),
+                      ),
                     ),
-                    NavigationRailDestination(
-                      icon: Icon(Icons.search),
-                      label: Text("Search"),
-                    ),
-                    NavigationRailDestination(
-                      icon: Icon(Icons.music_note_rounded),
-                      label: Text("Current Playing"),
-                    ),
-                    NavigationRailDestination(
-                      icon: Icon(Icons.settings),
-                      label: Text("Settings"),
-                    ),
+                    const BaseAudioPlayer()
                   ],
-                  leading: Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 8.0),
-                    child: Image.asset(
-                      'assets/app_icon.ico',
-                      width: 35,
-                    ),
-                  ),
-                  labelType: NavigationRailLabelType.none,
-                  backgroundColor: Colors.black,
-                  indicatorColor: Colors.grey.shade900,
-                  unselectedIconTheme: const IconThemeData(color: Colors.grey),
-                  selectedIconTheme: const IconThemeData(color: Colors.white),
                 ),
-                Expanded(
+              ),
+              if (currentWidth > 450)
+                SizedBox(
+                  width: currentWidth - 430,
                   child: Column(
                     children: [
-                      Expanded(
-                        flex: 1,
-                        child: IndexedStack(
-                          index: index,
-                          children: [
-                            _buildNavigator(
-                              0,
-                              const ExploreView(),
-                            ),
-                            _buildNavigator(
-                              1,
-                              const SearchView(),
-                            ),
-                            _buildNavigator(
-                              2,
-                              const CurrentPlayingView(),
-                            ),
-                            _buildNavigator(
-                              3,
-                              const SettingsView(),
-                            ),
-                          ],
-                        ),
-                      ),
-                      const BaseAudioPlayer(),
+                      SizedBox(
+                        width: double.maxFinite,
+                        height: MediaQuery.of(context).size.height,
+                        child: const ExploreList(),
+                      )
                     ],
                   ),
                 ),
-              ],
-            ),
+            ],
           ),
         ),
+        // child: Scaffold(
+        //   backgroundColor: Colors.transparent,
+        //   body: BlurImageContainer(
+        //     child: Row(
+        //       children: [
+        //         NavigationRail(
+        //           selectedIndex: index,
+        //           onDestinationSelected: (idx) => config.onIndex(idx),
+        //           destinations: const [
+        //             NavigationRailDestination(
+        //               icon: Icon(Icons.home),
+        //               label: Text("Home"),
+        //             ),
+        //             NavigationRailDestination(
+        //               icon: Icon(Icons.search),
+        //               label: Text("Search"),
+        //             ),
+        //             NavigationRailDestination(
+        //               icon: Icon(Icons.music_note_rounded),
+        //               label: Text("Current Playing"),
+        //             ),
+        //             NavigationRailDestination(
+        //               icon: Icon(Icons.settings),
+        //               label: Text("Settings"),
+        //             ),
+        //           ],
+        //           leading: Padding(
+        //             padding: const EdgeInsets.symmetric(vertical: 8.0),
+        //             child: Image.asset(
+        //               'assets/app_icon.ico',
+        //               width: 35,
+        //             ),
+        //           ),
+        //           labelType: NavigationRailLabelType.none,
+        //           backgroundColor: Colors.black,
+        //           indicatorColor: Colors.grey.shade900,
+        //           unselectedIconTheme: const IconThemeData(color: Colors.grey),
+        //           selectedIconTheme: const IconThemeData(color: Colors.white),
+        //         ),
+        //         Expanded(
+        //           child: Column(
+        //             children: [
+        //               Expanded(
+        //                 flex: 1,
+        //                 child: IndexedStack(
+        //                   index: index,
+        //                   children: [
+        //                     _buildNavigator(
+        //                       0,
+        //                       const ExploreView(),
+        //                     ),
+        //                     _buildNavigator(
+        //                       1,
+        //                       const SearchView(),
+        //                     ),
+        //                     _buildNavigator(
+        //                       2,
+        //                       const CurrentPlayingView(),
+        //                     ),
+        //                     _buildNavigator(
+        //                       3,
+        //                       const SettingsView(),
+        //                     ),
+        //                   ],
+        //                 ),
+        //               ),
+        //               const BaseAudioPlayer(),
+        //             ],
+        //           ),
+        //         ),
+        //       ],
+        //     ),
+        //   ),
+        // ),
       ),
     );
   }
 
-  Widget _buildNavigator(int index, Widget child) {
-    return Navigator(
-      key: GlobalKey<NavigatorState>(debugLabel: 'navigator$index'),
-      onGenerateRoute: (settings) => MaterialPageRoute(
-        builder: (context) => child,
-      ),
-    );
-  }
+  // Widget _buildNavigator(int index, Widget child) {
+  //   return Navigator(
+  //     key: GlobalKey<NavigatorState>(debugLabel: 'navigator$index'),
+  //     onGenerateRoute: (settings) => MaterialPageRoute(
+  //       builder: (context) => child,
+  //     ),
+  //   );
+  // }
 
   @override
   void onTrayIconRightMouseDown() async {

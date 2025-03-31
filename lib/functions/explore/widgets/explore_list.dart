@@ -5,7 +5,6 @@ import 'package:sangeet/core/core.dart';
 import 'package:sangeet/core/skeletions/explore_loading_skeletion.dart';
 
 import 'package:sangeet/functions/explore/widgets/browse_card.dart';
-import 'package:sangeet/functions/explore/widgets/trend_card.dart';
 
 import 'package:sangeet/functions/explore/controllers/explore_controller.dart';
 import 'package:sangeet/functions/player/controllers/player_controller.dart';
@@ -13,7 +12,6 @@ import 'package:sangeet/functions/player/controllers/player_controller.dart';
 import 'package:sangeet/functions/charts/view/charts_view.dart';
 import 'package:sangeet/functions/album/view/album_view.dart';
 import 'package:sangeet/functions/playlist/view/playlist_view.dart';
-import 'package:sangeet/functions/song/view/song_view.dart';
 
 class ExploreList extends ConsumerWidget {
   const ExploreList({super.key});
@@ -26,87 +24,12 @@ class ExploreList extends ConsumerWidget {
             final radios = data.radios;
             final albums = data.albums;
             final playlists = data.topPlaylists;
-            final trendings = data.trending;
 
             return SingleChildScrollView(
               physics: const BouncingScrollPhysics(),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // TRENDINGS
-                  const Padding(
-                    padding: EdgeInsets.all(10.0),
-                    child: Text(
-                      'Trendings.',
-                      style: TextStyle(
-                        fontSize: 30,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                  Container(
-                    margin: const EdgeInsets.symmetric(vertical: 20.0),
-                    height: 290.0,
-                    child: GridView.count(
-                      crossAxisCount: 3,
-                      childAspectRatio: 0.2,
-                      scrollDirection: Axis.horizontal,
-                      physics: const BouncingScrollPhysics(),
-                      children: trendings
-                          .map(
-                            (item) => TrendCard(
-                              key: Key("trend_${item.id}"),
-                              onPlay: () => ref
-                                  .watch(playerControllerProvider.notifier)
-                                  .runRadio(
-                                    radioId: item.id,
-                                    type: MediaType.fromString(item.type),
-                                    redirect: () {
-                                      if (item.type == 'song') {
-                                        Navigator.of(context)
-                                            .push(SongView.route(item.id));
-                                      }
-                                      if (item.type == 'album') {
-                                        Navigator.of(context)
-                                            .push(AlbumView.route(item.id));
-                                      }
-                                      if (item.type == 'playlist') {
-                                        Navigator.of(context)
-                                            .push(PlaylistView.route(item.id));
-                                      }
-                                    },
-                                  ),
-                              onLike: () {},
-                              onTap: () {
-                                if (item.type == 'song') {
-                                  Navigator.of(context)
-                                      .push(SongView.route(item.id));
-                                }
-                                if (item.type == 'album') {
-                                  Navigator.of(context)
-                                      .push(AlbumView.route(item.id));
-                                }
-                                if (item.type == 'playlist') {
-                                  Navigator.of(context)
-                                      .push(PlaylistView.route(item.id));
-                                }
-                              },
-                              image: item.image,
-                              accentColor: item.accentColor,
-                              title: item.title,
-                              subtitle: item.subtitle,
-                              explicitContent: item.explicitContent,
-                              badgeIcon: item.type == "song"
-                                  ? Icons.music_note
-                                  : item.type == "playlist"
-                                      ? Icons.playlist_play_rounded
-                                      : Icons.album_rounded,
-                            ),
-                          )
-                          .toList(),
-                    ),
-                  ),
-
                   // ALBUMS //
                   const Padding(
                     padding: EdgeInsets.all(10.0),

@@ -172,13 +172,15 @@ class PlayerController extends StateNotifier<bool> {
 
       await _player.play();
       SongModel song = _player.audioSource?.sequence[_player.currentIndex!].tag;
+      await _smtc.enableSmtc();
       await _smtc.updateMetadata(MusicMetadata(
         title: song.title,
         album: song.albumName,
         thumbnail: song.images[1].url,
         artist: song.artists[0].name,
       ));
-      FlutterDiscordRPC.instance.setActivity(
+      await _smtc.setPlaybackStatus(PlaybackStatus.playing);
+      await FlutterDiscordRPC.instance.setActivity(
         activity: RPCActivity(
           activityType: ActivityType.listening,
           state: "${song.title} - ${song.albumName}",
@@ -361,10 +363,16 @@ class PlayerController extends StateNotifier<bool> {
     }
   }
 
+  Future<void> reset() async {
+    await _player.stop();
+    await playlist.clear();
+    await _smtc.disableSmtc();
+  }
+
   @override
   void dispose() {
-    super.dispose();
     _player.dispose();
     _smtc.dispose();
+    super.dispose();
   }
 }

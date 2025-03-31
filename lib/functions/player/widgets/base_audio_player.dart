@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:audio_video_progress_bar/audio_video_progress_bar.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:sangeet/core/app_config.dart';
 import 'package:sangeet/functions/player/controllers/player_controller.dart';
 import 'package:sangeet/functions/player/widgets/common.dart';
 import 'package:sangeet/functions/player/widgets/player_control_buttons.dart';
@@ -29,11 +28,43 @@ class _BaseAudioPlayerState extends ConsumerState<BaseAudioPlayer> {
       builder: (context, snapshot) {
         final state = snapshot.data;
 
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return Container(height: 0);
-        }
         if (state?.sequence.isEmpty ?? true) {
-          return const SizedBox();
+          return Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(5),
+              border: Border.all(
+                color: Colors.teal.withOpacity(.09),
+                width: 2,
+              ),
+            ),
+            width: double.infinity,
+            height: 80,
+            child: const Center(
+              child: Text(
+                "Nothing Playing",
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ),
+          );
+        }
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(5),
+              border: Border.all(
+                color: Colors.teal.withOpacity(.09),
+                width: 2,
+              ),
+            ),
+            width: double.infinity,
+            height: 80,
+            child: const Center(
+              child: LinearProgressIndicator(),
+            ),
+          );
         }
 
         final metadata = state!.currentSource!.tag as SongModel;
@@ -57,37 +88,37 @@ class _BaseAudioPlayerState extends ConsumerState<BaseAudioPlayer> {
                         width: 70,
                       ),
                     ),
-                    Flexible(
-                      child: Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              metadata.title,
-                              style: const TextStyle(
-                                fontWeight: FontWeight.bold,
-                              ),
-                              maxLines: 1,
-                            ),
-                            Text(
-                              metadata.albumName,
-                              maxLines: 1,
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
+                    // Flexible(
+                    //   child: Padding(
+                    //     padding: const EdgeInsets.all(8.0),
+                    //     child: Column(
+                    //       mainAxisSize: MainAxisSize.min,
+                    //       crossAxisAlignment: CrossAxisAlignment.start,
+                    //       children: [
+                    //         Text(
+                    //           metadata.title,
+                    //           style: const TextStyle(
+                    //             fontWeight: FontWeight.bold,
+                    //           ),
+                    //           maxLines: 1,
+                    //         ),
+                    //         Text(
+                    //           metadata.albumName,
+                    //           maxLines: 1,
+                    //         ),
+                    //       ],
+                    //     ),
+                    //   ),
+                    // ),
                   ],
                 ),
               ),
               Expanded(
-                flex: 2,
+                flex: 4,
                 child: Container(
                   padding: const EdgeInsets.all(8.0),
                   child: Column(
-                    mainAxisSize: MainAxisSize.min,
+                    mainAxisSize: MainAxisSize.max,
                     crossAxisAlignment: CrossAxisAlignment.center,
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
@@ -123,24 +154,24 @@ class _BaseAudioPlayerState extends ConsumerState<BaseAudioPlayer> {
                   ),
                 ),
               ),
-              Expanded(
-                flex: MediaQuery.of(context).size.width >= 880 ? 1 : 0,
-                child: Container(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      IconButton(
-                        onPressed: () => ref
-                            .watch(appScreenConfigProvider.notifier)
-                            .onIndex(2),
-                        icon: const Icon(Icons.open_in_full_rounded),
-                      ),
-                    ],
-                  ),
-                ),
-              )
+              // Expanded(
+              //   flex: MediaQuery.of(context).size.width >= 880 ? 1 : 0,
+              //   child: Container(
+              //     padding: const EdgeInsets.all(8.0),
+              //     child: Row(
+              //       mainAxisSize: MainAxisSize.min,
+              //       mainAxisAlignment: MainAxisAlignment.end,
+              //       children: [
+              //         IconButton(
+              //           onPressed: () => ref
+              //               .watch(appScreenConfigProvider.notifier)
+              //               .onIndex(2),
+              //           icon: const Icon(Icons.open_in_full_rounded),
+              //         ),
+              //       ],
+              //     ),
+              //   ),
+              // )
             ],
           ),
         );

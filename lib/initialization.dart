@@ -32,7 +32,7 @@ Future<void> initWindowManager() async {
   windowManager.waitUntilReadyToShow(windowOptions, () async {
     await windowManager.show();
     await windowManager.focus();
-    await windowManager.setMinimumSize(const Size(600, 800));
+    await windowManager.setMinimumSize(const Size(450, 800));
     await windowManager.setPreventClose(true);
 
     await trayManager.setIcon('assets/app_icon.ico');
