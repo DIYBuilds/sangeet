@@ -42,16 +42,15 @@ class MyApp extends StatelessWidget {
           colorSchemeSeed: Colors.lightBlueAccent,
         ),
         darkTheme: ThemeData.dark().copyWith(
-          textTheme: GoogleFonts.ubuntuTextTheme(ThemeData.dark().textTheme),
-          colorScheme: ColorScheme.fromSeed(
-            seedColor: Colors.lightBlueAccent,
-            brightness: Brightness.dark,
-          ),
-          cardTheme: const CardTheme(
-            color: Colors.transparent,
-            elevation: .5,
-          ),
-        ),
+            textTheme: GoogleFonts.ubuntuTextTheme(ThemeData.dark().textTheme),
+            colorScheme: ColorScheme.fromSeed(
+              seedColor: Colors.lightBlueAccent,
+              brightness: Brightness.dark,
+            ),
+            cardTheme: const CardThemeData(
+              color: Colors.transparent,
+              elevation: .5,
+            )),
         themeMode: ThemeMode.dark,
         home: const HomeFrame(),
         builder: BotToastInit(),
