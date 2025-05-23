@@ -3,20 +3,12 @@
 #
 
 list(APPEND FLUTTER_PLUGIN_LIST
-  flutter_acrylic
-  hotkey_manager_windows
-  just_audio_windows
-  media_kit_libs_windows_audio
-  screen_retriever
-  tray_manager
-  url_launcher_windows
+  audioplayers_windows
+  screen_retriever_windows
   window_manager
-  windows_notification
 )
 
 list(APPEND FLUTTER_FFI_PLUGIN_LIST
-  flutter_discord_rpc
-  smtc_windows
 )
 
 set(PLUGIN_BUNDLED_LIBRARIES)

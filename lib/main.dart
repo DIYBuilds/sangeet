@@ -1,31 +1,27 @@
-import 'package:context_menus/context_menus.dart';
 import 'package:flutter/material.dart';
-
-import 'package:bot_toast/bot_toast.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:hotkey_manager/hotkey_manager.dart';
-import 'package:just_audio_media_kit/just_audio_media_kit.dart';
+import 'package:sangeet/home/home_screen.dart';
+import 'package:window_manager/window_manager.dart';
 
-import 'package:sangeet/frame/home.dart';
-import 'package:sangeet/initialization.dart';
-
-Future<void> main() async {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await hotKeyManager.unregisterAll();
-  JustAudioMediaKit.ensureInitialized();
-  JustAudioMediaKit.ensureInitialized(
-    linux: false, // default: true  - dependency: media_kit_libs_linux
-    windows: true,
+  // Must add this line.
+  await windowManager.ensureInitialized();
+
+  WindowOptions windowOptions = WindowOptions(
+    size: Size(800, 600),
+    minimumSize: const Size(600, 700),
+    center: true,
+    backgroundColor: Colors.transparent,
+    skipTaskbar: false,
+    titleBarStyle: TitleBarStyle.hidden,
   );
-  JustAudioMediaKit.title = 'Sangeet';
-  JustAudioMediaKit.prefetchPlaylist = true;
-  await initialiseAppFunctions();
-  runApp(
-    const ProviderScope(
-      child: MyApp(),
-    ),
-  );
+  windowManager.waitUntilReadyToShow(windowOptions, () async {
+    await windowManager.show();
+    await windowManager.focus();
+  });
+
+  runApp(ProviderScope(child: const MyApp()));
 }
 
 class MyApp extends StatelessWidget {
@@ -34,31 +30,41 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return ContextMenuOverlay(
-      child: MaterialApp(
-        title: 'Sangeet',
-        debugShowCheckedModeBanner: false,
-        theme: ThemeData(
-          colorSchemeSeed: Colors.lightBlueAccent,
+    return MaterialApp(
+      title: 'Sangeet',
+      // themeMode: ThemeMode.dark,
+      debugShowCheckedModeBanner: false,
+      theme: ThemeData(
+        brightness: Brightness.light,
+        scaffoldBackgroundColor: const Color.fromARGB(255, 215, 217, 215),
+        appBarTheme: const AppBarTheme(
+          backgroundColor: Color.fromARGB(255, 215, 217, 215),
+          foregroundColor: Colors.black,
+          elevation: 0, // Flat app bar
         ),
-        darkTheme: ThemeData.dark().copyWith(
-          textTheme: GoogleFonts.ubuntuTextTheme(ThemeData.dark().textTheme),
-          colorScheme: ColorScheme.fromSeed(
-            seedColor: Colors.lightBlueAccent,
-            brightness: Brightness.dark,
-          ),
-          cardTheme: const CardTheme(
-            color: Colors.transparent,
-            elevation: .5,
-          ),
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: Colors.deepPurple,
+          brightness: Brightness.light,
         ),
-        themeMode: ThemeMode.dark,
-        home: const HomeFrame(),
-        builder: BotToastInit(),
-        navigatorObservers: [
-          BotToastNavigatorObserver(),
-        ],
       ),
+      darkTheme: ThemeData(
+        brightness: Brightness.dark,
+        scaffoldBackgroundColor: const Color(
+          0xFF121212,
+        ), // Common dark theme background
+        appBarTheme: const AppBarTheme(
+          backgroundColor: Color(0xFF1F1F1F), // Darker app bar
+          foregroundColor: Colors.white,
+          elevation: 0, // Flat app bar
+        ),
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: Colors.deepPurple,
+          brightness: Brightness.dark,
+        ),
+        // Add other dark theme specific properties here
+      ),
+      // darkTheme: ThemeData.dark(),
+      home: const HomeView(),
     );
   }
 }
